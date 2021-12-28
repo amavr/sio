@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+console.log('started from www');
+require('../index');
