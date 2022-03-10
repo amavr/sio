@@ -19,7 +19,7 @@ const routes = require('../routes');
 
 let server;
 
-function initialize() {
+function initialize(onStart) {
     return new Promise((resolve, reject) => {
         const app = express();
 
@@ -28,6 +28,11 @@ function initialize() {
         app.use(cookieParser());
         app.use(express.static(path.join(__dirname, 'public')));
         app.use('/api', routes);
+
+        app.get('/', (req, res) => {
+            res.end('Hello World!');
+        });
+
 
         // catch 404 and forward to error handler
         app.use(function (req, res, next) {
@@ -44,10 +49,7 @@ function initialize() {
         });
 
         server = http.createServer(app);
-
-        app.get('/', (req, res) => {
-            res.end('Hello World!');
-        });
+        server.startCallback = onStart;
 
         server.on('error', onError);
         server.on('listening', onListening);
@@ -62,9 +64,7 @@ function onListening() {
             log.info(err);
         }
         else {
-            const ofs = 10;
-            log.info("URL: ".padStart(ofs) + `http://${host}:${cfg.port}/`);
-            log.info("".padEnd(32, '='));
+            if(server.startCallback) server.startCallback(host, cfg.port);
         }
     })
 }

@@ -7,14 +7,24 @@ async function startup() {
         const log = await logConfig.initialize('ROOT');
 
         const ofs = 10;
-        log.info("".padEnd(32, '='));
-        log.info("NODE_ENV: ".padStart(ofs) + process.env.NODE_ENV);
-        log.info("Platform: ".padStart(ofs) + process.platform);
-        log.info("Version: ".padStart(ofs) + process.version);
-        log.info("Arch: ".padStart(ofs) + process.arch);
+        log.info("".padEnd(ofs * 2 + 2, '='));
+        log.info(`${"NODE_ENV".padStart(ofs)}: ${process.env.NODE_ENV}`);
+        log.info(`${"Platform".padStart(ofs)}: ${process.platform}`);
+        log.info(`${"Version".padStart(ofs)}: ${process.version}`);
+        log.info(`${"Arch".padStart(ofs)}: ${process.arch}`);
         
-        await db.initialize();
-        await webServer.initialize();
+        await db.initialize((props) => {
+            for(const key of Object.keys(props)){
+                log.info(`${key.padStart(ofs)}: ${props[key]}`);
+            }
+        });
+
+        await webServer.initialize((host, port) => {
+            log.info(`${"URL".padStart(ofs)}: http://${host}:${port}/`);
+            log.info("".padEnd(ofs * 2 + 2, '='));
+        });
+
+        log.info("".padEnd(32, '='));
 
     } catch (err) {
         console.error(err);
